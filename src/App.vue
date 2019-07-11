@@ -13,13 +13,20 @@
       <div class="songList">
         <ul v-if="show">
           <div class="title"><span>歌曲</span><span>歌手</span></div>
-          <li v-for="(result,index) in results" :key="index">
+          <li v-for="(result,index) in results" :key="index" :data-url="result.url">
             <span>{{result.title}}</span>
+            <svg class="icon" v-if="seePlay" @click="playSong">
+              <use xlink:href="#icon-play" />
+            </svg>
+            <svg class="icon" v-else @click="pauseSong">
+              <use xlink:href="#icon-pause" />
+            </svg>
             <span>{{result.author}}</span>
           </li>
         </ul>
       </div>
     </main>
+    <audio muted autoplay loop :src="url" id="audio"></audio>
   </div>
 </template>
 <script>
@@ -29,7 +36,9 @@ export default {
     return {
       results: [],
       songName: "真心英雄",
-      show: false
+      show: false,
+      seePlay: true,
+      url: ''
     };
   },
   mounted() {
@@ -42,7 +51,19 @@ export default {
         .then(response => {
           this.results = response.data.result;
           this.show = true;
+          console.log(this.results)
         });
+    },
+    playSong(event){
+      this.seePlay = false
+      this.url = event.target.parentNode.getAttribute('data-url')
+      setTimeout(()=>{
+        this.$el.querySelector("#audio").play()
+      },0)
+    },
+    pauseSong(event){
+      this.seePlay = true
+      this.$el.querySelector("#audio").pause()
     }
   }
 };
@@ -116,6 +137,22 @@ main {
   ul{
     li{
       padding: 4px 0;
+      display: flex;
+      align-items: center;
+      .icon{
+        height: 40px;
+        width: 40px;
+        margin-right: 10px;
+        position: absolute;
+        left: 350px;
+        visibility: hidden;
+      }
+      &:hover{
+        background: #e6f8f9;
+        .icon{
+          visibility: visible;
+        }
+      }
       span{
         display: inline-block;
         height: 36px;
@@ -128,6 +165,7 @@ main {
         }
       }
     }
+    
   }
 }
 </style>
