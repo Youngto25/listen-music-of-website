@@ -1,6 +1,10 @@
 <template>
   <div>
-    <header></header>
+    <header>
+      <div class="logo">
+        Fmusic
+      </div>
+    </header>
     <main>
       <div class="search-wrapper">
         <div class="search">
@@ -15,10 +19,10 @@
           <div class="title"><span>歌曲</span><span>歌手</span></div>
           <li v-for="(result,index) in results" :key="index" :data-url="result.url">
             <span>{{result.title}}</span>
-            <svg class="icon" v-if="seePlay" @click="playSong">
+            <svg class="icon play" @click="playSong">
               <use xlink:href="#icon-play" />
             </svg>
-            <svg class="icon" v-else @click="pauseSong">
+            <svg class="icon pause" @click="pauseSong" style="display: none;">
               <use xlink:href="#icon-pause" />
             </svg>
             <span>{{result.author}}</span>
@@ -51,24 +55,45 @@ export default {
         .then(response => {
           this.results = response.data.result;
           this.show = true;
-          console.log(this.results)
+          this.modifyIcon()
         });
     },
     playSong(event){
-      this.seePlay = false
-      this.url = event.target.parentNode.getAttribute('data-url')
+      this.modifyIcon()
+      var parent = event.target.parentNode
+      this.url = parent.getAttribute('data-url')
+      parent.children[1].style.display = 'none'
+      parent.children[2].style.display = 'block'
       setTimeout(()=>{
         this.$el.querySelector("#audio").play()
       },0)
     },
     pauseSong(event){
-      this.seePlay = true
+      var parent = event.target.parentNode
+      parent.children[1].style.display = 'block'
+      parent.children[2].style.display = 'none'
       this.$el.querySelector("#audio").pause()
+    },
+    modifyIcon(){
+      let playIcon = this.$el.querySelectorAll('.play')
+      let pauseIcon = this.$el.querySelectorAll('.pause')
+      for(let i = 0; i < playIcon.length; i++){
+        playIcon[i].style.display = 'block'
+        pauseIcon[i].style.display = 'none'
+      }
     }
   }
 };
 </script>
 <style  lang="scss" scoped>
+ @font-face {
+    font-family: 'logo';
+    src: url('font/King Lionel - Personal Use.ttf')  format('truetype');
+}
+ @font-face {
+    font-family: 'my-font';
+    src: url('font/Ming Imperial.TTF')  format('truetype');
+}
 *{
   margin: 0;
   padding: 0;
@@ -80,6 +105,14 @@ ul,ol{
 header {
   background: #fff;
   height: 90px;
+  display: flex;
+  align-items: center;
+  .logo{
+    font-size: 48px;
+    margin-left: 48px;
+    color: #31c27c;
+    font-family: 'logo';
+  }
 }
 main {
   .search-wrapper {
@@ -117,12 +150,13 @@ main {
     }
   }
   .songList{
-    width: 956px;
+    margin-top: 20px;
+    width: 666px;
     position: relative;
     left: 50%;
     transform: translateX(-50%);
     .title{
-      background: #F7F7F7;
+      background: #f1f2f6;
       span{
         display: inline-block;
         height: 36px;
@@ -146,11 +180,15 @@ main {
         position: absolute;
         left: 350px;
         visibility: hidden;
+        cursor: pointer;
       }
       &:hover{
-        background: #e6f8f9;
+        background: #F7F7F7;
         .icon{
           visibility: visible;
+          &:hover{
+            fill: #31c27c;
+          }
         }
       }
       span{
@@ -158,10 +196,16 @@ main {
         height: 36px;
         line-height: 36px;
         font-size: 14px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
         &:first-child{
           padding-left: 16px;
           width: 400px;
           color: #31c27c;
+        }
+        &:last-child{
+          width: 266px;
         }
       }
     }
